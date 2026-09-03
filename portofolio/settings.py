@@ -158,5 +158,4 @@ MAILERS = {
 }
 
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "<https://pws.cs.ui.ac.id/muhammad.fachri54/myportofolio>"]
-
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
