@@ -161,4 +161,4 @@ MAILERS = {
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
 
-CSRF_TRUSTED_ORIGINS=["muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
+CSRF_TRUSTED_ORIGINS=["https://muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
