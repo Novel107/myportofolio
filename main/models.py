@@ -24,3 +24,28 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+
+
+
+class Education(models.Model):
+    DEGREE_CHOICES = [
+        ('SMA', 'Sekolah Menengah Atas'),
+        ('MAN', 'Madrasah Aliyah Negeri'),
+        ('D3', 'Diploma 3'),
+        ('D4', 'Diploma 4'),
+        ('S1', 'Strata 1'),
+        ('S2', 'Strata 2'),
+        ('S3', 'Strata 3'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    institution_name = models.CharField(max_length=255)
+    degree = models.CharField(max_length=50, choices=DEGREE_CHOICES, default='S1')
+    major = models.CharField(max_length=255)
+    start_year = models.IntegerField()
+    end_year = models.IntegerField(blank=True, null=True) 
+    description = models.TextField(blank=True, null=True) 
+
+    def __str__(self):
+        return f"{self.institution_name} - {self.major}"
