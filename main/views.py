@@ -29,7 +29,8 @@ def show_education(request):
     education_list = Education.objects.all()
 
     context = {
-        'education_list': education_list
+        "nickname": "Fachri",
+        'education_list': education_list,
     }
 
     return render(request, 'education.html', context)
