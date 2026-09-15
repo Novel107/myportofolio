@@ -1,6 +1,6 @@
-from django.shortcuts import render
-
+from django.shortcuts import render, redirect
 from main.models import Experience, Education
+from main.forms import EducationForm
 
 
 def show_main(request):
@@ -34,3 +34,16 @@ def show_education(request):
     }
 
     return render(request, 'education.html', context)
+
+def create_education(request):
+    form = EducationForm(request.POST or None)
+
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect('main:show_education')
+
+    context = {
+        'form': form,
+        'nickname': 'Fachri',
+    }
+    return render(request, "create_education.html", context)
