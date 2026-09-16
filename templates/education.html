@@ -13,7 +13,6 @@
                     </a>
                 </div>
 
-
                 <div class="education-grid">
                     {% for edu in education_list %}
                         <article class="education-card">
@@ -33,6 +32,15 @@
                             {% if edu.description %}
                                 <p class="education-description">{{ edu.description }}</p>
                             {% endif %}
+
+                            <!-- VVV TAMBAHAN TOMBOL HAPUS VVV -->
+                            <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem;">
+                                <a href="{% url 'main:delete_education' edu.pk %}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
+                                    Hapus
+                                </a>
+                            </div>
+                            <!-- ^^^ SELESAI ^^^ -->
+
                         </article>
                     {% empty %}
                         <p class="empty-state">

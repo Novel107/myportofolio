@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from main.models import Experience, Education
 from main.forms import EducationForm
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.http import HttpResponse
+from django.core import serializers
 
 
 def show_main(request):
@@ -47,3 +51,24 @@ def create_education(request):
         'nickname': 'Fachri',
     }
     return render(request, "create_education.html", context)
+
+def delete_education(request, id):
+    education = Education.objects.get(pk=id)
+    education.delete()
+    return HttpResponseRedirect(reverse('main:show_education'))
+
+def show_xml(request):
+    data = Education.objects.all()
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+def show_json(request):
+    data = Education.objects.all()
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+def show_xml_by_id(request, id):
+    data = Education.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+def show_json_by_id(request, id):
+    data = Education.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
