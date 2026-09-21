@@ -1,33 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ nickname }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ nickname }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-            </nav>
-        </div>
-    </header>
+{% extends 'base.html' %}
 
-    <!-- Penambahan bagian  -->
+{% block content %}
     <main>
         <section class="experience-section" id="experience">
             <div class="container">
                 <p class="section-kicker">Perjalanan saya sejauh ini</p>
                 <h1>Experience</h1>
                 
+                
+                <div style="margin-bottom: 2rem; margin-top: 1rem;">
+                    <a href="{% url 'main:create_experience' %}" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem;">
+                        + Tambah Pengalaman Baru
+                    </a>
+                </div>
+
                 <div class="experience-grid">
                     {% for experience in experience_list %}
                         <article class="experience-card">
@@ -43,6 +29,13 @@
                             {% else %}
                                 <p class="experience-status">Selesai</p>
                             {% endif %}
+
+                            
+                            <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
+                                <a href="{% url 'main:update_experience' experience.pk %}" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
+                                <a href="{% url 'main:delete_experience' experience.pk %}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Hapus</a>
+                            </div>
+                            
                         </article>
                     {% empty %}
                         <p class="empty-state">
@@ -53,12 +46,4 @@
             </div>
         </section>
     </main>
-    <!--  -->
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ nickname }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock content %}

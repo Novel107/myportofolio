@@ -19,8 +19,8 @@ class ExperienceForm(ModelForm):
         model = Experience
         fields = [
             "title", 
-            "company", 
-            "start_year", 
-            "end_year", 
-            "description",
+            "category", 
+            "description", 
+            "thumbnail",
+            "ended_at"
         ]

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from main.models import Experience, Education
-from main.forms import EducationForm
+from main.forms import EducationForm, ExperienceForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
@@ -29,6 +29,7 @@ def show_experience(request):
     }
     return render(request, "experience.html", context)
 
+
 def show_education(request):
     education_list = Education.objects.all()
 
@@ -38,6 +39,7 @@ def show_education(request):
     }
 
     return render(request, 'education.html', context)
+
 
 def create_education(request):
     form = EducationForm(request.POST or None)
@@ -52,23 +54,69 @@ def create_education(request):
     }
     return render(request, "create_education.html", context)
 
+
 def delete_education(request, id):
     education = Education.objects.get(pk=id)
     education.delete()
     return HttpResponseRedirect(reverse('main:show_education'))
 
+
 def show_xml(request):
     data = Education.objects.all()
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
 
 def show_json(request):
     data = Education.objects.all()
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
+
 def show_xml_by_id(request, id):
     data = Education.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
+
 def show_json_by_id(request, id):
     data = Education.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+
+# Create experience
+
+def create_experience(request):
+    form = ExperienceForm(request.POST or None)
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect('main:show_experience')
+
+    context = {
+        'form': form,
+        'nickname': 'Fachri',
+    }
+    return render(request, "create_experience.html", context)
+
+
+def update_experience(request, id):
+    experience = Experience.objects.get(pk=id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+    
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect('main:show_experience')
+    
+    context = {
+        'form': form,
+        'nickname': 'Fachri',
+    }
+    return render(request, "update_experience.html", context)
+
+
+def delete_experience(request, id):
+    experience = Experience.objects.get(pk=id)
+    experience.delete()
+    return HttpResponseRedirect(reverse('main:show_experience'))
+
+
+def show_json_experience(request):
+    data = Experience.objects.all()
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
