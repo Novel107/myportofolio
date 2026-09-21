@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    <section class="container" style="padding: 3rem 0; max-width: 600px;">
+        <h1 style="margin-bottom: 2rem;">Edit Pengalaman</h1>
+        <form method="POST" class="project-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button" style="margin-top: 2rem;">Simpan Perubahan</button>
+        </form>
+    </section>
+</main>
+{% endblock content %}
