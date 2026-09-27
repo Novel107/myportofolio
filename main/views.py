@@ -138,3 +138,7 @@ def register(request):
         "form": form,
     }
     return render(request, "register.html", context)
+
+def logout_user(request):
+    logout(request)
+    return redirect("main:show_main")
