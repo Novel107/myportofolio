@@ -133,7 +133,8 @@ def register(request):
         return redirect("main:login")
     
     context = {
-        "name": "Muhammad Fachri Novelino", 
+        "name": "Muhammad Fachri Novelino",
+        "nickname": "Fachri",
         "form": form,
     }
     return render(request, "register.html", context)
