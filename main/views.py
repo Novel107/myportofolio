@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render, redirect
 from main.models import Experience, Education
 from main.forms import EducationForm, ExperienceForm
@@ -12,6 +13,7 @@ from django.shortcuts import redirect, render
 
 
 def show_main(request):
+    last_login = request.COOKIES.get('last_login', 'Belum ada sesi login / Cookie tidak ditemukan')
     context = {
         "name": "Muhammad Fachri Novelino",
         "nickname":"Fachri",
@@ -21,6 +23,7 @@ def show_main(request):
             "Mahasiswa Ilmu Komputer Universitas Indonesia yang tertarik "
             "pada Software Enginer dan Cyber Security."
         ),
+        "last_login": last_login,
     }
     return render(request, "index.html", context)
 
@@ -143,18 +146,23 @@ def register(request):
     return render(request, "register.html", context)
 
 def login_user(request):
-    form = AuthenticationForm(request, data=request.POST or None)
-
-    if request.method == "POST" and form.is_valid():
-        login(request, form.get_user())
-        return redirect("main:show_main")
-
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            response = HttpResponseRedirect(reverse("main:show_main"))
+            response.set_cookie('last_login', str(datetime.datetime.now()))
+            return response
+    else:
+        form = AuthenticationForm(request)
+        
     context = {
         'form': form,
-        'nickname': 'Fachri', # Tambahkan baris ini
+        'nickname': 'Fachri',
         'name': 'Muhammad Fachri Novelino'
     }
-    return render(request, "login.html", context)
+    return render(request, 'login.html', context)
 
 def logout_user(request):
     logout(request)
