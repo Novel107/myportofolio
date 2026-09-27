@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required  # Tambahkan baris ini
+from django.core.exceptions import PermissionDenied        # Tambahkan baris ini
 
 
 def show_main(request):
@@ -48,9 +50,12 @@ def show_education(request):
     return render(request, 'education.html', context)
 
 
+@login_required(login_url="/login/")
 def create_education(request):
-    form = EducationForm(request.POST or None)
+    if not request.user.is_superuser:
+        raise PermissionDenied
 
+    form = EducationForm(request.POST or None)
     if form.is_valid() and request.method == "POST":
         form.save()
         return redirect('main:show_education')
@@ -62,7 +67,11 @@ def create_education(request):
     return render(request, "create_education.html", context)
 
 
+@login_required(login_url="/login/")
 def delete_education(request, id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     education = Education.objects.get(pk=id)
     education.delete()
     return HttpResponseRedirect(reverse('main:show_education'))
@@ -90,7 +99,11 @@ def show_json_by_id(request, id):
 
 # Create experience
 
+@login_required(login_url="/login/")
 def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     form = ExperienceForm(request.POST or None)
     if form.is_valid() and request.method == "POST":
         form.save()
@@ -103,7 +116,11 @@ def create_experience(request):
     return render(request, "create_experience.html", context)
 
 
+@login_required(login_url="/login/")
 def update_experience(request, id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     experience = Experience.objects.get(pk=id)
     form = ExperienceForm(request.POST or None, instance=experience)
     
@@ -118,7 +135,11 @@ def update_experience(request, id):
     return render(request, "update_experience.html", context)
 
 
+@login_required(login_url="/login/")
 def delete_experience(request, id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     experience = Experience.objects.get(pk=id)
     experience.delete()
     return HttpResponseRedirect(reverse('main:show_experience'))
@@ -166,4 +187,6 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    return redirect("main:show_main")
+    response = redirect("main:show_main")
+    response.delete_cookie('last_login')
+    return response
