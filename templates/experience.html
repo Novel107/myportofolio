@@ -7,12 +7,13 @@
                 <p class="section-kicker">Perjalanan saya sejauh ini</p>
                 <h1>Experience</h1>
                 
-                
+                {% if user.is_superuser %}
                 <div style="margin-bottom: 2rem; margin-top: 1rem;">
                     <a href="{% url 'main:create_experience' %}" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem;">
                         + Tambah Pengalaman Baru
                     </a>
                 </div>
+                {% endif %}
 
                 <div class="experience-grid">
                     {% for experience in experience_list %}
@@ -30,11 +31,12 @@
                                 <p class="experience-status">Selesai</p>
                             {% endif %}
 
-                            
+                            {% if user.is_superuser %}
                             <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
                                 <a href="{% url 'main:update_experience' experience.pk %}" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
                                 <a href="{% url 'main:delete_experience' experience.pk %}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Hapus</a>
                             </div>
+                            {% endif %}
                             
                         </article>
                     {% empty %}
