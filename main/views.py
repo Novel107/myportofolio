@@ -125,19 +125,18 @@ def show_json_experience(request):
     data = Experience.objects.all()
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
-def register(request):
-    form = UserCreationForm(request.POST or None)
+def login_user(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+
     if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Akun berhasil dibuat. Silakan login.")
-        return redirect("main:login")
-    
+        login(request, form.get_user())
+        return redirect("main:show_main")
+
     context = {
-        "name": "Muhammad Fachri Novelino",
-        "nickname": "Fachri",
+        "name": "Fachri",
         "form": form,
     }
-    return render(request, "register.html", context)
+    return render(request, "login.html", context)
 
 def logout_user(request):
     logout(request)
