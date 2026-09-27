@@ -35,10 +35,15 @@
                                 {% include "experience_star.html" with experience=experience %}
                             </div>
 
-                            {% if user.is_superuser %}
+                            {% if user.is_superuser or is_editor %}
                             <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
+                                
                                 <a href="{% url 'main:update_experience' experience.pk %}" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
+                                
+                                {% if user.is_superuser %}
                                 <a href="{% url 'main:delete_experience' experience.pk %}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Hapus</a>
+                                {% endif %}
+                                
                             </div>
                             {% endif %}
                             

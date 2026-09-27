@@ -1,18 +1,15 @@
 import datetime
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from main.models import Experience, Education
 from main.forms import EducationForm, ExperienceForm
 from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core import serializers
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
 
 
 def show_main(request):
@@ -32,10 +29,14 @@ def show_main(request):
 
 
 def show_experience(request):
+    # Cek apakah user yang login tergabung di grup Editor
+    is_editor = request.user.groups.filter(name='Editor').exists() if request.user.is_authenticated else False
+    
     context = {
         "name": "Muhammad Fachri Novelino",
         "nickname": "Fachri",
         "experience_list": Experience.objects.all(),
+        "is_editor": is_editor, # Kirim variabel boolean ke template
     }
     return render(request, "experience.html", context)
 
@@ -119,7 +120,9 @@ def create_experience(request):
 
 @login_required(login_url="/login/")
 def update_experience(request, id):
-    if not request.user.is_superuser:
+    is_editor = request.user.groups.filter(name='Editor').exists()
+    
+    if not (request.user.is_superuser or is_editor):
         raise PermissionDenied
 
     experience = Experience.objects.get(pk=id)
@@ -148,7 +151,10 @@ def delete_experience(request, id):
 
 def show_json_experience(request):
     data = Experience.objects.all()
-    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+    return HttpResponse(
+        serializers.serialize("json", data, fields=("title", "description", "category", "is_ongoing")), 
+        content_type="application/json"
+    )
 
 
 
@@ -198,8 +204,6 @@ def toggle_star(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
     
     if request.method == "POST":
-        # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
-        # Kalau belum, tambahkan star.
         if request.user in experience.starred_by.all():
             experience.starred_by.remove(request.user)
         else:

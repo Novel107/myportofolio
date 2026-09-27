@@ -56,3 +56,16 @@ Proses serialization mutlak diperlukan karena data yang ditarik dari database ol
 Deklarasi Penggunaan AI:
 
 Untuk tugas ini, saya menggunakan bantuan AI (Gemini) sebagai teman diskusi untuk lebih memahami materi. Berhubung tugas ini masih mirip dengan Tutorial 3 dan ada beberapa fungsi yang serupa, diskusi dengan AI sangat membantu mempermudah workflow penyelesaiannya. Sementara untuk front-end, saya menggunakan ulang dan memodifikasi kode HTML serta CSS dari bagian Education yang sudah saya buat sebelumnya untuk dipakai di bagian Experience.
+
+---
+## Tugas 4
+
+Deklarasi Penggunaan AI:
+Dalam pengerjaan Tugas 4 ini, saya menggunakan Gemini sebagai alat bantu. Secara keseluruhan, AI sangat membantu dalam mengeksekusi pengerjaan dan memahami alur workflow Django, serta memberitahu apa saja syntax atau fungsi spesifik yang harus digunakan.
+
+Bagian Spesifik yang Dibantu AI:
+1. Memahami logika penerapan hak akses (otorisasi) untuk peran Editor dan Superuser di dalam views.py.
+
+2. Menyusun struktur template tag pada HTML ({% if user.is_superuser or is_editor %}) untuk menyembunyikan atau menampilkan tombol action.
+
+3. Menutup celah kebocoran data sensitif pada endpoint JSON dengan menggunakan parameter fields.
