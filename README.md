@@ -41,3 +41,18 @@ Contohnya: Ketika saya menambahkan model baru bernama Education di models.py, sa
 
 Deklarasi Penggunaan AI:
 Untuk tugas ini, saya menggunakan bantuan AI seperti Gemini sebagai sarana diskusi untuk lebih memahami struktur kerangka kerja Django serta penulisan unit test. Sementara untuk implementasi front-end, saya sebagian besar menggunakan ulang dan memodifikasi struktur HTML serta elemen CSS yang sudah saya kerjakan sebelumnya di bagian Experience untuk diadaptasi ke bagian Education.
+
+## Tugas 3
+
+1. Kita menggunakan ModelForm karena fitur ini secara otomatis membuat struktur form HTML berdasarkan atribut yang sudah didefinisikan di dalam model database, sehingga kode menjadi jauh lebih ringkas odelForm juga mengotomatisasi validasi data input dan proses penyimpanan langsung ke database (melalui form.save()). Jika kita membuat form HTML manual, kita harus menulis setiap tag <input> satu per satu dan memvalidasi tipe datanya secara manual di views.py.
+Sementara itu, {% csrf_token %} (Cross-Site Request Forgery) diwajibkan oleh Django pada setiap form bermetode POST sebagai lapisan keamanan. Token unik ini memastikan bahwa data yang disubmit benar-benar berasal dari website kita, mencegah serangan dari situs web berbahaya yang mencoba mengirimkan data palsu seolah-olah berasal dari pengguna yang sah.
+
+2.JSON menjadi dominasi karena formatnya jauh lebih ringan dan ringkas dibandingkan XML yang sangat bergantung pada banyak tag pembuka dan penutup. Ukuran file yang lebih kecil membuat proses transfer dan parsing data JSON menjadi jauh lebih cepat di jaringan.
+
+3. Client mengirim permintaan ke URL tertentu -> Django mengarahkan URL tersebut ke fungsi view terkait -> view mengambil data dari database (menghasilkan objek Python bernama QuerySet) -> QuerySet diserialisasi menjadi string JSON -> string JSON tersebut dikembalikan ke client melalui HttpResponse dengan content-type application/json.
+Proses serialization mutlak diperlukan karena data yang ditarik dari database oleh Django masih berupa objek Python (Model instances) yang kompleks dan terikat dengan ekosistem backend. Protokol HTTP tidak bisa mengirim objek Python secara mentah. Oleh karena itu, serialization bertugas menerjemahkan (mengubah bentuk) objek kompleks tersebut menjadi format teks datar (seperti JSON) agar bisa ditransmisikan lewat jaringan dan dimengerti oleh aplikasi frontend.
+
+---
+Deklarasi Penggunaan AI:
+
+Untuk tugas ini, saya menggunakan bantuan AI (Gemini) sebagai teman diskusi untuk lebih memahami materi. Berhubung tugas ini masih mirip dengan Tutorial 3 dan ada beberapa fungsi yang serupa, diskusi dengan AI sangat membantu mempermudah workflow penyelesaiannya. Sementara untuk front-end, saya menggunakan ulang dan memodifikasi kode HTML serta CSS dari bagian Education yang sudah saya buat sebelumnya untuk dipakai di bagian Experience.
