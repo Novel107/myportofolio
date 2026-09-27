@@ -31,6 +31,10 @@
                                 <p class="experience-status">Selesai</p>
                             {% endif %}
 
+                            <div style="margin-top: 1rem;">
+                                {% include "experience_star.html" with experience=experience %}
+                            </div>
+
                             {% if user.is_superuser %}
                             <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
                                 <a href="{% url 'main:update_experience' experience.pk %}" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>

@@ -10,8 +10,9 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required  # Tambahkan baris ini
-from django.core.exceptions import PermissionDenied        # Tambahkan baris ini
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
 
 
 def show_main(request):
@@ -190,3 +191,18 @@ def logout_user(request):
     response = redirect("main:show_main")
     response.delete_cookie('last_login')
     return response
+
+
+@login_required(login_url="/login/")
+def toggle_star(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+    
+    if request.method == "POST":
+        # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
+        # Kalau belum, tambahkan star.
+        if request.user in experience.starred_by.all():
+            experience.starred_by.remove(request.user)
+        else:
+            experience.starred_by.add(request.user)
+            
+    return redirect("main:show_experience")

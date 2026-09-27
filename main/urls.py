@@ -4,7 +4,7 @@ from main.views import (
     create_education, delete_education, 
     show_xml, show_json, show_xml_by_id, show_json_by_id,
     create_experience, update_experience, delete_experience, show_json_experience,
-    register, login_user, logout_user
+    register, login_user, logout_user, toggle_star
 ) 
 
 app_name = "main"
@@ -29,4 +29,7 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
+    path('experience/<uuid:experience_id>/star/', toggle_star, name='toggle_star'),
 ]
+
+
