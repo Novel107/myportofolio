@@ -9,9 +9,47 @@
                 
                 {% if user.is_superuser %}
                 <div style="margin-bottom: 2rem; margin-top: 1rem;">
-                    <a href="{% url 'main:create_experience' %}" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem;">
+                    <!-- Tombol pemanggil Modal -->
+                    <button type="button" popovertarget="add-experience-modal" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer;">
                         + Tambah Pengalaman Baru
-                    </a>
+                    </button>
+                </div>
+
+                <!-- Struktur Modal Form (Tersembunyi) -->
+                <div id="add-experience-modal" class="project-form-modal" popover="auto">
+                    <div class="project-form-modal_content" style="max-width: 500px;">
+                        <h2 style="margin-bottom: 1rem;">Tambah Pengalaman Baru</h2>
+                        <form id="addExperienceForm">
+                            {% csrf_token %}
+                            <div style="margin-bottom: 1rem;">
+                                <label for="title" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Judul</label>
+                                <input type="text" id="title" name="title" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label for="description" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Deskripsi</label>
+                                <textarea id="description" name="description" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);" rows="4"></textarea>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label for="category" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Kategori</label>
+                                <select id="category" name="category" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                                    <option value="full-time">Full-Time</option>
+                                    <option value="part-time">Part-Time</option>
+                                    <option value="internship">Internship</option>
+                                    <option value="freelance">Freelance</option>
+                                    <option value="volunteer">Volunteer</option>
+                                    <option value="research">Research</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="is_ongoing" name="is_ongoing">
+                                <label for="is_ongoing" style="font-weight: bold;">Sedang berlangsung</label>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                                <button type="button" class="button button-secondary" popovertarget="add-experience-modal" popovertargetaction="hide">Batal</button>
+                                <button type="submit" class="button" style="background-color: #000; color: #fff; border: none;">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 {% endif %}
 
@@ -25,6 +63,16 @@
     <script>
         const isSuperuser = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
         const isEditor = "{{ is_editor|yesno:'true,false' }}" === "true";
+
+        // Fungsi untuk melakukan escaping karakter HTML agar aman dari XSS
+        function escapeHtml(str) {
+            return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+}
     
         async function getExperiences() {
             return fetch("{% url 'main:get_experiences_json' %}").then((res) => res.json());
@@ -95,9 +143,9 @@
             
                     htmlString += `
                         <article class="experience-card">
-                            <span class="experience-category">${experience.category}</span>
-                            <h2>${experience.title}</h2>
-                            <p class="experience-description">${experience.description}</p>
+                            <span class="experience-category">${escapeHtml(experience.category)}</span>
+                            <h2>${escapeHtml(experience.title)}</h2>
+                            <p class="experience-description">${escapeHtml(experience.description)}</p>
                             ${statusHtml}
                             <div style="margin-top: 1rem;">
                                 ${starForm}
@@ -112,5 +160,31 @@
         }
     
         refreshExperiences();
+
+        const addExperienceForm = document.getElementById("addExperienceForm");
+        if (addExperienceForm) {
+            addExperienceForm.addEventListener("submit", async (e) => {
+                e.preventDefault(); // Mencegah reload halaman
+                const formData = new FormData(addExperienceForm);
+
+                try {
+                    const response = await fetch("{% url 'main:add_experience_ajax' %}", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        addExperienceForm.reset();
+                        document.getElementById("add-experience-modal").hidePopover();
+                        await refreshExperiences();
+                        showToast("Sukses!", "Pengalaman berhasil ditambahkan", "success");
+                    } else {
+                        showToast("Gagal", "Terjadi kesalahan saat menyimpan data.", "error");
+                    }
+                } catch (error) {
+                    showToast("Error", "Gagal terhubung ke server.", "error");
+                }
+            });
+        }
     </script>
 {% endblock content %}
