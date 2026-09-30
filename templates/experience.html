@@ -15,51 +15,102 @@
                 </div>
                 {% endif %}
 
-                <div class="experience-grid">
-                    {% for experience in experience_list %}
-                        <article class="experience-card">
-                            <span class="experience-category">
-                                {{ experience.get_category_display }}
-                            </span>
-                            <h2>{{ experience.title }}</h2>
-                            <p class="experience-description">
-                                {{ experience.description }}
-                            </p>
-                            {% if experience.is_ongoing %}
-                                <p class="experience-status">Sedang berlangsung</p>
-                            {% else %}
-                                <p class="experience-status">Selesai</p>
-                            {% endif %}
-
-                            <div style="margin-top: 1rem;">
-                                {% include "components/experience_star.html" with experience=experience %}
-                            </div>
-
-                            {% if user.is_superuser or is_editor %}
-                            <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
-                                
-                                <a href="{% url 'main:update_experience' experience.pk %}" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
-                                
-                                {% if user.is_superuser %}
-                                <button type="button" popovertarget="delete-experience-{{ experience.pk }}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none;">
-                                    Hapus
-                                </button>
-                                
-                                <!-- Memanggil file modal dari folder components -->
-                                {% include 'components/experience_delete_modal.html' with experience=experience %}
-                                {% endif %}
-                                
-                            </div>
-                            {% endif %}
-                            
-                        </article>
-                    {% empty %}
-                        <p class="empty-state">
-                            Belum ada pengalaman yang ditambahkan.
-                        </p>
-                    {% endfor %}
-                </div>
+                <!-- Container kosong yang akan diisi oleh JavaScript (AJAX) -->
+                <div id="experience_grid" class="experience-grid"></div>
+                
             </div>
         </section>
     </main>
+
+    <script>
+        const isSuperuser = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+        const isEditor = "{{ is_editor|yesno:'true,false' }}" === "true";
+    
+        async function getExperiences() {
+            return fetch("{% url 'main:get_experiences_json' %}").then((res) => res.json());
+        }
+    
+        async function refreshExperiences() {
+            document.getElementById("experience_grid").innerHTML = "";
+            const experiences = await getExperiences();
+            let htmlString = "";
+    
+            if (experiences.length === 0) {
+                htmlString = `
+                    <p class="empty-state">
+                        Belum ada pengalaman yang ditambahkan.
+                    </p>
+                `;
+            } else {
+                experiences.forEach((item) => {
+                    const pk = item.pk;
+                    const experience = item.fields;
+                    const statusHtml = experience.is_ongoing 
+                        ? '<p class="experience-status">Sedang berlangsung</p>' 
+                        : '<p class="experience-status">Selesai</p>';
+    
+                    let actionHtml = '';
+                    if (isSuperuser || isEditor) {
+                        let deleteBtn = '';
+                        if (isSuperuser) {
+                            deleteBtn = `
+                                <button type="button" popovertarget="delete-experience-${pk}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none;">
+                                    Hapus
+                                </button>
+                                
+                                <!-- Struktur Modal Hapus langsung disisipkan ke HTML -->
+                                <div id="delete-experience-${pk}" class="project-form-modal" popover="auto">
+                                    <div class="project-form-modal_content" style="max-width: 400px; text-align: center;">
+                                        <h2 style="margin-bottom: 1rem;">Konfirmasi Hapus</h2>
+                                        <p>Apakah kamu yakin ingin menghapus pengalaman <strong>${experience.title}</strong>?</p>
+                                        <form method="post" action="/delete-experience/${pk}/" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem;">
+                                            {% csrf_token %}
+                                            <button type="button" class="button button-secondary" popovertarget="delete-experience-${pk}" popovertargetaction="hide">Batal</button>
+                                            <button type="submit" class="button" style="background-color: #b42318; border-color: #b42318;">Ya, Hapus</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            `;
+                        }
+    
+                        actionHtml = `
+                            <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
+                                <a href="/update-experience/${pk}/" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
+                                ${deleteBtn}
+                            </div>
+                        `;
+                    }
+    
+                    const starClass = experience.is_starred ? "button-star is-starred" : "button-star";
+                    const starText = experience.is_starred ? "Unstar" : "Star";
+                    const starForm = `
+                        <form action="/experience/${pk}/star/" method="POST" class="star-form">
+                            {% csrf_token %}
+                            <button type="submit" class="button ${starClass}">
+                                ★ ${starText} <span class="star-count">${experience.star_count}</span>
+                            </button>
+                        </form>
+                    `;
+    
+            
+                    htmlString += `
+                        <article class="experience-card">
+                            <span class="experience-category">${experience.category}</span>
+                            <h2>${experience.title}</h2>
+                            <p class="experience-description">${experience.description}</p>
+                            ${statusHtml}
+                            <div style="margin-top: 1rem;">
+                                ${starForm}
+                            </div>
+                            ${actionHtml}
+                        </article>
+                    `;
+                });
+            }
+            
+            document.getElementById("experience_grid").innerHTML = htmlString;
+        }
+    
+        refreshExperiences();
+    </script>
 {% endblock content %}

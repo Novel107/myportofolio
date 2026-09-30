@@ -10,6 +10,9 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils.html import strip_tags
 
 
 def show_main(request):
@@ -29,14 +32,12 @@ def show_main(request):
 
 
 def show_experience(request):
-    # Cek apakah user yang login tergabung di grup Editor
     is_editor = request.user.groups.filter(name='Editor').exists() if request.user.is_authenticated else False
     
     context = {
         "name": "Muhammad Fachri Novelino",
         "nickname": "Fachri",
-        "experience_list": Experience.objects.all(),
-        "is_editor": is_editor, # Kirim variabel boolean ke template
+        "is_editor": is_editor, 
     }
     return render(request, "experience.html", context)
 
@@ -149,12 +150,31 @@ def delete_experience(request, id):
     return HttpResponseRedirect(reverse('main:show_experience'))
 
 
-def show_json_experience(request):
-    data = Experience.objects.all()
-    return HttpResponse(
-        serializers.serialize("json", data, fields=("title", "description", "category", "is_ongoing")), 
-        content_type="application/json"
-    )
+def get_experiences_json(request):
+    # Ambil semua experience dan gabungkan relasi starred_by agar lebih efisien
+    experiences = Experience.objects.prefetch_related('starred_by').all()
+        
+    # Konstruksi data JSON secara manual
+    data = []
+    for experience in experiences:
+        starred_users = experience.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+        
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "description": experience.description,
+                "category": experience.get_category_display(), # Mengambil label dari pilihan kategori
+                "is_ongoing": experience.is_ongoing,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+        
+    return JsonResponse(data, safe=False)
 
 
 
@@ -172,6 +192,23 @@ def register(request):
         'name': 'Muhammad Fachri Novelino'
     }
     return render(request, "register.html", context)
+
+@login_required(login_url="/login/")
+@require_POST
+def add_experience_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Akses ditolak"}, status=403)
+
+    form = ExperienceForm(request.POST)
+    if form.is_valid():
+        experience = form.save(commit=False)
+        experience.title = strip_tags(experience.title)
+        experience.description = strip_tags(experience.description)
+        experience.save()
+        
+        return JsonResponse({"status": "success", "message": "Pengalaman berhasil ditambahkan!"}, status=201)
+    
+    return JsonResponse({"status": "error", "message": form.errors}, status=400)
 
 def login_user(request):
     if request.method == 'POST':
