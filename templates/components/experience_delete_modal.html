@@ -1,0 +1,16 @@
+<div id="delete-experience-{{ experience.pk }}" class="project-form-modal" popover="auto">
+    <div class="project-form-modal_content" style="max-width: 400px; text-align: center;">
+        <h2 style="margin-bottom: 1rem;">Konfirmasi Hapus</h2>
+        <p>Apakah kamu yakin ingin menghapus pengalaman <strong>{{ experience.title }}</strong>?</p>
+        
+        <form method="post" action="{% url 'main:delete_experience' experience.pk %}" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem;">
+            {% csrf_token %}
+            <button type="button" class="button button-secondary" popovertarget="delete-experience-{{ experience.pk }}" popovertargetaction="hide">
+                Batal
+            </button>
+            <button type="submit" class="button" style="background-color: #b42318; border-color: #b42318;">
+                Ya, Hapus
+            </button>
+        </form>
+    </div>
+</div>

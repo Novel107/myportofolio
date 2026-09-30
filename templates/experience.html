@@ -32,7 +32,7 @@
                             {% endif %}
 
                             <div style="margin-top: 1rem;">
-                                {% include "experience_star.html" with experience=experience %}
+                                {% include "components/experience_star.html" with experience=experience %}
                             </div>
 
                             {% if user.is_superuser or is_editor %}
@@ -41,7 +41,12 @@
                                 <a href="{% url 'main:update_experience' experience.pk %}" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
                                 
                                 {% if user.is_superuser %}
-                                <a href="{% url 'main:delete_experience' experience.pk %}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Hapus</a>
+                                <button type="button" popovertarget="delete-experience-{{ experience.pk }}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none;">
+                                    Hapus
+                                </button>
+                                
+                                <!-- Memanggil file modal dari folder components -->
+                                {% include 'components/experience_delete_modal.html' with experience=experience %}
                                 {% endif %}
                                 
                             </div>
