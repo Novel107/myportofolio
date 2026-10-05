@@ -69,3 +69,28 @@ Bagian Spesifik yang Dibantu AI:
 2. Menyusun struktur template tag pada HTML ({% if user.is_superuser or is_editor %}) untuk menyembunyikan atau menampilkan tombol action.
 
 3. Menutup celah kebocoran data sensitif pada endpoint JSON dengan menggunakan parameter fields.
+
+---
+### Tugas 5
+
+1. Jelaskan apa itu debouncing dan mengapa teknik ini penting diterapkan pada fitur pencarian yang menggunakan AJAX!
+*Debouncing* adalah teknik pemrograman yang digunakan untuk menunda eksekusi sebuah fungsi sampai sejumlah waktu tertentu berlalu sejak fungsi tersebut terakhir kali dipanggil. Pada fitur pencarian AJAX, teknik ini sangat penting karena mencegah browser mengirimkan *request* ke server setiap kali pengguna menekan satu tombol (keystroke). Dengan *debouncing*, *request* hanya akan dikirim setelah pengguna berhenti mengetik sejenak (misalnya 300ms), sehingga beban server menjadi jauh lebih ringan, menghemat *bandwidth*, dan membuat aplikasi lebih responsif.
+
+2. Jelaskan fungsi dari penggunaan await ketika kita menggunakan fetch()! Apa yang akan terjadi jika kita tidak menggunakan await?
+Fungsi `await` digunakan di dalam fungsi *asynchronous* (async) untuk memberhentikan sementara eksekusi kode sampai *Promise* yang dikembalikan oleh `fetch()` selesai (*resolved* atau *rejected*). Jika kita tidak menggunakan `await`, eksekusi kode JavaScript akan terus berjalan ke baris berikutnya sebelum proses pengambilan data selesai. Akibatnya, variabel yang seharusnya menampung hasil *fetch* hanya akan berisi objek *Promise* yang belum selesai (*pending*), dan data yang diharapkan tidak akan bisa ditampilkan atau dirender ke dalam HTML.
+
+3. Jelaskan apa itu serangan XSS (Cross-Site Scripting) dan mengapa data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan ini daripada data yang ditampilkan langsung melalui template Django!
+XSS (Cross-Site Scripting) adalah celah keamanan di mana penyerang menyuntikkan skrip berbahaya (biasanya JavaScript) ke dalam halaman web yang dilihat oleh pengguna lain. Data yang dirender menggunakan AJAX/JavaScript (misalnya disisipkan menggunakan `innerHTML`) lebih rentan karena browser akan membaca dan mengeksekusi tag HTML atau skrip mentah secara langsung jika tidak dibersihkan (*escape*). Sebaliknya, *template engine* bawaan Django sudah memiliki perlindungan *auto-escaping* secara *default*, yang secara otomatis mengubah karakter berbahaya seperti `<` dan `>` menjadi entitas HTML aman (`&lt;` dan `&gt;`) sebelum dirender, sehingga skrip tidak bisa tereksekusi.
+
+Deklarasi Penggunaan AI:
+Dalam pengerjaan Tugas 5 ini, saya menggunakan Gemini sebagai alat bantu. Secara keseluruhan, AI sangat membantu dalam mengidentifikasi penyebab error pada alur AJAX, memahami konsep asinkronus pada JavaScript, serta menyusun struktur kode untuk memanipulasi DOM secara dinamis.
+
+Bagian Spesifik yang Dibantu AI:
+
+1. Debugging Form AJAX: Menemukan dan memperbaiki penyebab Error 400 Bad Request saat POST data, yang ternyata disebabkan oleh ketidakcocokan nilai atribut value pada tag <option> HTML dengan choices di models.py.
+
+2. Perlindungan XSS (Cross-Site Scripting): Menyusun fungsi escapeHtml di JavaScript untuk sisi frontend dan memindahkan logika strip_tags ke forms.py (melalui fungsi clean_title dan clean_description) di sisi backend.
+
+3. Pencarian dengan Debouncing: Menerapkan logika penundaan eksekusi (timer menggunakan setTimeout dan clearTimeout) agar fungsi fetch() tidak membebani server setiap kali user mengetik di kolom pencarian.
+
+4. Manipulasi DOM & State Handling: Menyusun elemen HTML secara dinamis menggunakan template literal pada JavaScript, serta menangani state saat data sedang dimuat (loading), kosong, maupun error.

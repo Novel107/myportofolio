@@ -7,6 +7,11 @@
                 <p class="section-kicker">Perjalanan saya sejauh ini</p>
                 <h1>Experience</h1>
                 
+                <!-- Fitur Pencarian dengan Debouncing -->
+                <div style="margin-top: 1rem; margin-bottom: 2rem;">
+                    <input type="text" id="searchInput" placeholder="Cari pengalaman berdasarkan judul..." style="width: 100%; max-width: 400px; padding: 0.75rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                </div>
+
                 {% if user.is_superuser %}
                 <div style="margin-bottom: 2rem; margin-top: 1rem;">
                     <!-- Tombol pemanggil Modal -->
@@ -72,94 +77,128 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
-}
-    
-        async function getExperiences() {
-            return fetch("{% url 'main:get_experiences_json' %}").then((res) => res.json());
         }
     
-        async function refreshExperiences() {
-            document.getElementById("experience_grid").innerHTML = "";
-            const experiences = await getExperiences();
-            let htmlString = "";
+        // Mengubah getExperiences agar menerima parameter pencarian query (q)
+        async function getExperiences(query = "") {
+            const url = `{% url 'main:get_experiences_json' %}?q=${encodeURIComponent(query)}`;
+            return fetch(url).then((res) => {
+                if (!res.ok) throw new Error("Gagal memuat data");
+                return res.json();
+            });
+        }
     
-            if (experiences.length === 0) {
-                htmlString = `
-                    <p class="empty-state">
-                        Belum ada pengalaman yang ditambahkan.
-                    </p>
-                `;
-            } else {
-                experiences.forEach((item) => {
-                    const pk = item.pk;
-                    const experience = item.fields;
-                    const statusHtml = experience.is_ongoing 
-                        ? '<p class="experience-status">Sedang berlangsung</p>' 
-                        : '<p class="experience-status">Selesai</p>';
-    
-                    let actionHtml = '';
-                    if (isSuperuser || isEditor) {
-                        let deleteBtn = '';
-                        if (isSuperuser) {
-                            deleteBtn = `
-                                <button type="button" popovertarget="delete-experience-${pk}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none;">
-                                    Hapus
-                                </button>
-                                
-                                <!-- Struktur Modal Hapus langsung disisipkan ke HTML -->
-                                <div id="delete-experience-${pk}" class="project-form-modal" popover="auto">
-                                    <div class="project-form-modal_content" style="max-width: 400px; text-align: center;">
-                                        <h2 style="margin-bottom: 1rem;">Konfirmasi Hapus</h2>
-                                        <p>Apakah kamu yakin ingin menghapus pengalaman <strong>${experience.title}</strong>?</p>
-                                        <form method="post" action="/delete-experience/${pk}/" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem;">
-                                            {% csrf_token %}
-                                            <button type="button" class="button button-secondary" popovertarget="delete-experience-${pk}" popovertargetaction="hide">Batal</button>
-                                            <button type="submit" class="button" style="background-color: #b42318; border-color: #b42318;">Ya, Hapus</button>
-                                        </form>
+        async function refreshExperiences(query = "") {
+            const grid = document.getElementById("experience_grid");
+            
+            // Menampilkan kondisi Loading sebelum data datang
+            grid.innerHTML = `<p class="empty-state">Memuat data pengalaman...</p>`;
+            
+            try {
+                const experiences = await getExperiences(query);
+                let htmlString = "";
+        
+                // Kondisi jika data kosong
+                if (experiences.length === 0) {
+                    htmlString = `
+                        <p class="empty-state">
+                            Belum ada pengalaman yang ditambahkan atau ditemukan.
+                        </p>
+                    `;
+                } else {
+                    experiences.forEach((item) => {
+                        const pk = item.pk;
+                        const experience = item.fields;
+                        const statusHtml = experience.is_ongoing 
+                            ? '<p class="experience-status">Sedang berlangsung</p>' 
+                            : '<p class="experience-status">Selesai</p>';
+        
+                        let actionHtml = '';
+                        if (isSuperuser || isEditor) {
+                            let deleteBtn = '';
+                            if (isSuperuser) {
+                                deleteBtn = `
+                                    <button type="button" popovertarget="delete-experience-${pk}" style="color: #b42318; font-size: 0.85rem; font-weight: 700; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none;">
+                                        Hapus
+                                    </button>
+                                    
+                                    <!-- Struktur Modal Hapus langsung disisipkan ke HTML -->
+                                    <div id="delete-experience-${pk}" class="project-form-modal" popover="auto">
+                                        <div class="project-form-modal_content" style="max-width: 400px; text-align: center;">
+                                            <h2 style="margin-bottom: 1rem;">Konfirmasi Hapus</h2>
+                                            <p>Apakah kamu yakin ingin menghapus pengalaman <strong>${escapeHtml(experience.title)}</strong>?</p>
+                                            <form method="post" action="/delete-experience/${pk}/" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem;">
+                                                {% csrf_token %}
+                                                <button type="button" class="button button-secondary" popovertarget="delete-experience-${pk}" popovertargetaction="hide">Batal</button>
+                                                <button type="submit" class="button" style="background-color: #b42318; border-color: #b42318;">Ya, Hapus</button>
+                                            </form>
+                                        </div>
                                     </div>
+                                `;
+                            }
+        
+                            actionHtml = `
+                                <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
+                                    <a href="/update-experience/${pk}/" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
+                                    ${deleteBtn}
                                 </div>
                             `;
                         }
-    
-                        actionHtml = `
-                            <div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">
-                                <a href="/update-experience/${pk}/" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>
-                                ${deleteBtn}
-                            </div>
+        
+                        const starClass = experience.is_starred ? "button-star is-starred" : "button-star";
+                        const starText = experience.is_starred ? "Unstar" : "Star";
+                        const starForm = `
+                            <form action="/experience/${pk}/star/" method="POST" class="star-form">
+                                {% csrf_token %}
+                                <button type="submit" class="button ${starClass}">
+                                    ★ ${starText} <span class="star-count">${experience.star_count}</span>
+                                </button>
+                            </form>
                         `;
-                    }
-    
-                    const starClass = experience.is_starred ? "button-star is-starred" : "button-star";
-                    const starText = experience.is_starred ? "Unstar" : "Star";
-                    const starForm = `
-                        <form action="/experience/${pk}/star/" method="POST" class="star-form">
-                            {% csrf_token %}
-                            <button type="submit" class="button ${starClass}">
-                                ★ ${starText} <span class="star-count">${experience.star_count}</span>
-                            </button>
-                        </form>
-                    `;
-    
-            
-                    htmlString += `
-                        <article class="experience-card">
-                            <span class="experience-category">${escapeHtml(experience.category)}</span>
-                            <h2>${escapeHtml(experience.title)}</h2>
-                            <p class="experience-description">${escapeHtml(experience.description)}</p>
-                            ${statusHtml}
-                            <div style="margin-top: 1rem;">
-                                ${starForm}
-                            </div>
-                            ${actionHtml}
-                        </article>
-                    `;
-                });
+        
+                
+                        htmlString += `
+                            <article class="experience-card">
+                                <span class="experience-category">${escapeHtml(experience.category)}</span>
+                                <h2>${escapeHtml(experience.title)}</h2>
+                                <p class="experience-description">${escapeHtml(experience.description)}</p>
+                                ${statusHtml}
+                                <div style="margin-top: 1rem;">
+                                    ${starForm}
+                                </div>
+                                ${actionHtml}
+                            </article>
+                        `;
+                    });
+                }
+                
+                grid.innerHTML = htmlString;
+
+            } catch (error) {
+                // Menampilkan error state jika gagal mengambil data
+                grid.innerHTML = `<p class="empty-state" style="color: red;">Gagal memuat data. Silakan muat ulang halaman.</p>`;
             }
-            
-            document.getElementById("experience_grid").innerHTML = htmlString;
         }
     
+        // Memanggil data saat pertama kali halaman dimuat
         refreshExperiences();
+
+        // Mengimplementasikan fungsi Pencarian (Debouncing)
+        const searchInput = document.getElementById("searchInput");
+        let debounceTimer;
+
+        if (searchInput) {
+            searchInput.addEventListener("input", (e) => {
+                const query = e.target.value;
+                // Menghapus timer sebelumnya (membatalkan request jika pengguna masih mengetik)
+                clearTimeout(debounceTimer);
+                
+                // Set timer baru. Request baru akan dikirim setelah pengguna berhenti mengetik selama 300 milidetik
+                debounceTimer = setTimeout(() => {
+                    refreshExperiences(query);
+                }, 300);
+            });
+        }
 
         const addExperienceForm = document.getElementById("addExperienceForm");
         if (addExperienceForm) {
@@ -176,7 +215,11 @@
                     if (response.ok) {
                         addExperienceForm.reset();
                         document.getElementById("add-experience-modal").hidePopover();
+                        
+                        // Setelah sukses tambah data, hapus isi search input dan refresh ulang ke state awal
+                        if(searchInput) searchInput.value = "";
                         await refreshExperiences();
+                        
                         showToast("Sukses!", "Pengalaman berhasil ditambahkan", "success");
                     } else {
                         showToast("Gagal", "Terjadi kesalahan saat menyimpan data.", "error");

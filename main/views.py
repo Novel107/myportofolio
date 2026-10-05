@@ -151,10 +151,13 @@ def delete_experience(request, id):
 
 
 def get_experiences_json(request):
-    # Ambil semua experience dan gabungkan relasi starred_by agar lebih efisien
-    experiences = Experience.objects.prefetch_related('starred_by').all()
+    query = request.GET.get('q', '')
+    
+    if query:
+        experiences = Experience.objects.prefetch_related('starred_by').filter(title__icontains=query)
+    else:
+        experiences = Experience.objects.prefetch_related('starred_by').all()
         
-    # Konstruksi data JSON secara manual
     data = []
     for experience in experiences:
         starred_users = experience.starred_by.all()
@@ -201,10 +204,7 @@ def add_experience_ajax(request):
 
     form = ExperienceForm(request.POST)
     if form.is_valid():
-        experience = form.save(commit=False)
-        experience.title = strip_tags(experience.title)
-        experience.description = strip_tags(experience.description)
-        experience.save()
+        form.save()
         
         return JsonResponse({"status": "success", "message": "Pengalaman berhasil ditambahkan!"}, status=201)
     
