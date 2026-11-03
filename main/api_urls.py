@@ -5,4 +5,5 @@ app_name = "api"
 
 urlpatterns = [
     path("experiences/", api_views.experience_list, name="experience-list"),
+    path("experiences/<uuid:id>/", api_views.experience_detail, name="experience-detail"),
 ]
