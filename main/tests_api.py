@@ -107,12 +107,20 @@ class ExperienceAPITest(APITestCase):
         self.assertEqual(response.data["star_count"], 0)
         self.assertFalse(response.data["is_starred"])
 
-    def test_staff_and_editor_cannot_manage_tutorial_experiences(self):
-        self.visitor.is_staff = True
-        self.visitor.save()
+    def test_editor_can_update_but_cannot_create_or_delete(self):
         self.visitor.groups.add(Group.objects.create(name="Editor"))
         self.client.force_authenticate(user=self.visitor)
-        response = self.client.patch(self.detail_url, {"title": "Changed"}, format="json")
+        
+        # 1. Editor BISA update (PATCH) -> 200 OK
+        response = self.client.patch(self.detail_url, {"title": "Changed by Editor"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 2. Editor TIDAK BISA create (POST) -> 403 FORBIDDEN
+        response = self.client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # 3. Editor TIDAK BISA delete (DELETE) -> 403 FORBIDDEN
+        response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_wrong_method(self):
