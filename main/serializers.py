@@ -7,14 +7,13 @@ class ExperienceSerializer(serializers.ModelSerializer):
     is_starred = serializers.SerializerMethodField()
     starred_by_names = serializers.SerializerMethodField()
     
-    
     category_display = serializers.CharField(source='get_category_display', read_only=True)
 
     class Meta:
         model = Experience
         fields = [
-            "id", "title", "description", "category", "category_display", "is_ongoing",
-            "star_count", "is_starred", "starred_by_names",
+            "id", "title", "description", "category", "category_display", 
+            "is_ongoing", "star_count", "is_starred", "starred_by_names"
         ]
         read_only_fields = ["id"]
 
@@ -34,7 +33,10 @@ class ExperienceSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None or not request.user.is_authenticated:
             return False
-        return request.user in obj.starred_by.all()
+        return obj.starred_by.filter(pk=request.user.pk).exists()
 
     def get_starred_by_names(self, obj):
-        return ", ".join(user.username for user in obj.starred_by.all())
+        names = list(obj.starred_by.values_list("username", flat=True)[:3])
+        if obj.starred_by.count() > 3:
+            names.append("...")
+        return ", ".join(names)
