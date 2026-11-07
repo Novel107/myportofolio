@@ -1,81 +1,131 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <p class="section-kicker">Perjalanan saya sejauh ini</p>
-                <h1>Experience</h1>
-                
-                <!-- Fitur Pencarian -->
-                <div style="margin-top: 1rem; margin-bottom: 2rem;">
-                    <form id="experience-search-form" onsubmit="return false;">
-                        <input type="text" id="search-input" placeholder="Cari pengalaman berdasarkan judul..." style="width: 100%; max-width: 400px; padding: 0.75rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+<style>
+    .hide { display: none !important; }
+</style>
+
+{% include 'components/toast.html' %}
+
+<main>
+    <section class="experience-section" id="experience">
+        <div class="container">
+            <p class="section-kicker">Perjalanan saya sejauh ini</p>
+            <h1>Experience</h1>
+            
+            <!-- Fitur Pencarian -->
+            <div style="margin-top: 1rem; margin-bottom: 2rem;">
+                <form id="experience-search-form" onsubmit="return false;">
+                    <input type="text" id="search-input" placeholder="Cari pengalaman berdasarkan judul..." style="width: 100%; max-width: 400px; padding: 0.75rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                </form>
+            </div>
+
+            <!-- Tombol Tambah (Hanya Superuser) -->
+            {% if user.is_superuser %}
+            <div style="margin-bottom: 2rem; margin-top: 1rem;">
+                <button type="button" popovertarget="add-experience-modal" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer;">
+                    + Tambah Pengalaman Baru
+                </button>
+            </div>
+
+            <!-- Modal Tambah Pengalaman -->
+            <div id="add-experience-modal" class="project-form-modal" popover="auto">
+                <div class="project-form-modal_content" style="max-width: 500px;">
+                    <h2 style="margin-bottom: 1rem;">Tambah Pengalaman Baru</h2>
+                    <form id="experience-form">
+                        <div style="margin-bottom: 1rem;">
+                            <label for="title" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Judul</label>
+                            <input type="text" id="title" name="title" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label for="description" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Deskripsi</label>
+                            <textarea id="description" name="description" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);" rows="4"></textarea>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label for="category" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Kategori</label>
+                            <select id="category" name="category" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                                <option value="full-time">Full-Time</option>
+                                <option value="part-time">Part-Time</option>
+                                <option value="internship">Internship</option>
+                                <option value="freelance">Freelance</option>
+                                <option value="volunteer">Volunteer</option>
+                                <option value="research">Research</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="is_ongoing" name="is_ongoing">
+                            <label for="is_ongoing" style="font-weight: bold;">Sedang berlangsung</label>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button type="button" class="button button-secondary" popovertarget="add-experience-modal" popovertargetaction="hide">Batal</button>
+                            <button type="submit" class="button" style="background-color: #000; color: #fff; border: none;">Simpan</button>
+                        </div>
                     </form>
                 </div>
-
-                {% if user.is_superuser %}
-                <div style="margin-bottom: 2rem; margin-top: 1rem;">
-                    <button type="button" popovertarget="add-experience-modal" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer;">
-                        + Tambah Pengalaman Baru
-                    </button>
-                </div>
-
-                <div id="add-experience-modal" class="project-form-modal" popover="auto">
-                    <div class="project-form-modal_content" style="max-width: 500px;">
-                        <h2 style="margin-bottom: 1rem;">Tambah Pengalaman Baru</h2>
-                        <form id="experience-form">
-                            {% csrf_token %}
-                            <div style="margin-bottom: 1rem;">
-                                <label for="title" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Judul</label>
-                                <input type="text" id="title" name="title" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label for="description" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Deskripsi</label>
-                                <textarea id="description" name="description" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);" rows="4"></textarea>
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label for="category" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Kategori</label>
-                                <select id="category" name="category" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
-                                    <option value="full-time">Full-Time</option>
-                                    <option value="part-time">Part-Time</option>
-                                    <option value="internship">Internship</option>
-                                    <option value="freelance">Freelance</option>
-                                    <option value="volunteer">Volunteer</option>
-                                    <option value="research">Research</option>
-                                </select>
-                            </div>
-                            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="is_ongoing" name="is_ongoing">
-                                <label for="is_ongoing" style="font-weight: bold;">Sedang berlangsung</label>
-                            </div>
-                            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                                <button type="button" class="button button-secondary" popovertarget="add-experience-modal" popovertargetaction="hide">Batal</button>
-                                <button type="submit" class="button" style="background-color: #000; color: #fff; border: none;">Simpan</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- State containers untuk indikator AJAX -->
-                <div id="loading" style="text-align: center; margin: 2rem 0;" class="hide">Memuat data...</div>
-                <div id="error" style="text-align: center; color: red; margin: 2rem 0;" class="hide">Gagal memuat data.</div>
-                <div id="empty" style="text-align: center; margin: 2rem 0;" class="hide">Belum ada pengalaman yang ditemukan.</div>
-                
-                <div id="grid" class="experience-grid"></div>
-                
             </div>
-        </section>
-    </main>
+            {% endif %}
 
-    {% csrf_token %}
-    <script>
+            <!-- Modal Edit Pengalaman (Hanya dirender jika user = Superuser ATAU Editor) -->
+            {% if user.is_superuser or request.user.groups.all.0.name == "Editor" %}
+            <div id="update-experience-modal" class="project-form-modal" popover="auto">
+                <div class="project-form-modal_content" style="max-width: 500px;">
+                    <h2 style="margin-bottom: 1rem;">Edit Pengalaman</h2>
+                    <form id="update-experience-form">
+                        <input type="hidden" id="edit-id" name="id">
+                        <div style="margin-bottom: 1rem;">
+                            <label for="edit-title" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Judul</label>
+                            <input type="text" id="edit-title" name="title" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label for="edit-description" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Deskripsi</label>
+                            <textarea id="edit-description" name="description" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);" rows="4"></textarea>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label for="edit-category" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Kategori</label>
+                            <select id="edit-category" name="category" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 5px; background: var(--bg);">
+                                <option value="full-time">Full-Time</option>
+                                <option value="part-time">Part-Time</option>
+                                <option value="internship">Internship</option>
+                                <option value="freelance">Freelance</option>
+                                <option value="volunteer">Volunteer</option>
+                                <option value="research">Research</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="edit-is_ongoing" name="is_ongoing">
+                            <label for="edit-is_ongoing" style="font-weight: bold;">Sedang berlangsung</label>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button type="button" class="button button-secondary" popovertarget="update-experience-modal" popovertargetaction="hide">Batal</button>
+                            <button type="submit" class="button" style="background-color: #026aa7; color: #fff; border: none;">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- State containers untuk indikator AJAX -->
+            <div id="loading" style="text-align: center; margin: 2rem 0;" class="hide">Memuat data...</div>
+            <div id="error" style="text-align: center; color: red; margin: 2rem 0;" class="hide">Gagal memuat data.</div>
+            <div id="empty" style="text-align: center; margin: 2rem 0;" class="hide">Belum ada pengalaman yang ditemukan.</div>
+            
+            <div id="grid" class="experience-grid"></div>
+            
+        </div>
+    </section>
+</main>
+
+<!-- Dibutuhkan agar fungsi JS membaca Cookie CSRF -->
+{% csrf_token %}
+<script>
     const BASE_EXPERIENCES_ENDPOINT = "{% url 'api:experience-list' %}";
     const DETAIL_EXPERIENCE_ENDPOINT = "{% url 'api:experience-detail' '00000000-0000-0000-0000-000000000000' %}";
     const STAR_EXPERIENCE_ENDPOINT = "{% url 'api:experience-star' '00000000-0000-0000-0000-000000000000' %}";
+    
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+    const IS_EDITOR = "{{ request.user.groups.all.0.name }}" === "Editor" || IS_SUPERUSER;
 
     const loadingState = document.getElementById('loading');
     const errorState = document.getElementById('error');
@@ -84,6 +134,7 @@
     const searchForm = document.getElementById('experience-search-form'); 
     const searchInput = document.getElementById('search-input');
     const experienceForm = document.getElementById('experience-form');
+    const updateExperienceForm = document.getElementById('update-experience-form');
 
     let experiencesAbortController;
     let searchDebounceTimer;
@@ -126,10 +177,10 @@
         const remove = IS_SUPERUSER
             ? `<button type="button" class="button button-danger" style="background:none; border:none; color:#b42318; cursor:pointer; font-size:0.85rem; font-weight:bold; padding:0;" data-action="delete" data-id="${escapeHtml(experience.id)}">Hapus</button>` : '';
 
-        const update = IS_SUPERUSER
-            ? `<a href="/update-experience/${escapeHtml(experience.id)}/" style="color: #026aa7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Edit</a>` : '';
+        const update = IS_EDITOR
+            ? `<button type="button" data-action="edit" data-id="${escapeHtml(experience.id)}" data-title="${escapeHtml(experience.title)}" data-description="${escapeHtml(experience.description)}" data-category="${escapeHtml(experience.category)}" data-ongoing="${experience.is_ongoing}" style="background:none; border:none; color:#026aa7; font-size:0.85rem; font-weight:700; cursor:pointer; padding:0;">Edit</button>` : '';
         
-        const actions = (IS_SUPERUSER) ? `<div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">${update}${remove}</div>` : '';
+        const actions = (IS_EDITOR || IS_SUPERUSER) ? `<div style="margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; gap: 1rem;">${update}${remove}</div>` : '';
 
         article.innerHTML = `
             <span class="experience-category">${escapeHtml(experience.category_display)}</span>
@@ -201,34 +252,78 @@
             await writeExperience(BASE_EXPERIENCES_ENDPOINT, 'POST', payload);
             experienceForm.reset();
             document.getElementById('add-experience-modal')?.hidePopover();
-            showToast('Success', 'Experience created.', 'success');
+            showToast('Success', 'Pengalaman berhasil ditambahkan.', 'success');
             await fetchExperiences(searchInput ? searchInput.value.trim() : '');
         } catch (error) {
-            showToast('Could not create experience', error.message, 'error');
+            showToast('Gagal menambah pengalaman', error.message, 'error');
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    async function updateExperience(event) {
+        event.preventDefault();
+        const button = updateExperienceForm.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+        try {
+            const fields = new FormData(updateExperienceForm);
+            const id = fields.get('id');
+            const payload = {
+                title: fields.get('title'),
+                description: fields.get('description'),
+                category: fields.get('category'),
+                is_ongoing: fields.get('is_ongoing') === 'on' || fields.get('is_ongoing') === 'true'
+            };
+            
+            const endpoint = experienceEndpoint(DETAIL_EXPERIENCE_ENDPOINT, id);
+            await writeExperience(endpoint, 'PATCH', payload);
+            
+            updateExperienceForm.reset();
+            document.getElementById('update-experience-modal')?.hidePopover();
+            showToast('Success', 'Pengalaman berhasil diubah.', 'success');
+            await fetchExperiences(searchInput ? searchInput.value.trim() : '');
+        } catch (error) {
+            showToast('Gagal mengubah pengalaman', error.message, 'error');
         } finally {
             if (button) button.disabled = false;
         }
     }
 
     if (experienceForm) experienceForm.addEventListener('submit', addExperience);
+    if (updateExperienceForm) updateExperienceForm.addEventListener('submit', updateExperience);
 
     if (gridContainer) {
         gridContainer.addEventListener('click', async function(event) {
             const button = event.target.closest('button[data-action]');
             if (!button || button.disabled) return;
             const action = button.dataset.action;
-            if (action === 'delete' && !window.confirm('Hapus pengalaman ini?')) return;
             
-            button.disabled = true;
-            try {
-                const pattern = action === 'star' ? STAR_EXPERIENCE_ENDPOINT : DETAIL_EXPERIENCE_ENDPOINT;
-                await writeExperience(experienceEndpoint(pattern, button.dataset.id), action === 'star' ? 'POST' : 'DELETE');
-                showToast('Success', action === 'star' ? 'Star di-update.' : 'Pengalaman dihapus.', 'success');
-                await fetchExperiences(searchInput ? searchInput.value.trim() : '');
-            } catch (error) {
-                showToast('Request failed', error.message, 'error');
-            } finally {
-                button.disabled = false;
+            if (action === 'delete' || action === 'star') {
+                if (action === 'delete' && !window.confirm('Hapus pengalaman ini?')) return;
+                
+                button.disabled = true;
+                try {
+                    const pattern = action === 'star' ? STAR_EXPERIENCE_ENDPOINT : DETAIL_EXPERIENCE_ENDPOINT;
+                    await writeExperience(experienceEndpoint(pattern, button.dataset.id), action === 'star' ? 'POST' : 'DELETE');
+                    showToast('Success', action === 'star' ? 'Star di-update.' : 'Pengalaman dihapus.', 'success');
+                    await fetchExperiences(searchInput ? searchInput.value.trim() : '');
+                } catch (error) {
+                    showToast('Request failed', error.message, 'error');
+                } finally {
+                    button.disabled = false;
+                }
+            }
+            
+            if (action === 'edit') {
+                const modal = document.getElementById('update-experience-modal');
+                if (modal && updateExperienceForm) {
+                    updateExperienceForm.elements['id'].value = button.dataset.id;
+                    updateExperienceForm.elements['title'].value = button.dataset.title;
+                    updateExperienceForm.elements['description'].value = button.dataset.description;
+                    updateExperienceForm.elements['category'].value = button.dataset.category;
+                    updateExperienceForm.elements['is_ongoing'].checked = button.dataset.ongoing === 'true';
+                    modal.showPopover();
+                }
             }
         });
     }
@@ -249,5 +344,5 @@
     }
 
     fetchExperiences(searchInput ? searchInput.value.trim() : '');
-    </script>
+</script>
 {% endblock content %}
