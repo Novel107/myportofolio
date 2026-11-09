@@ -94,3 +94,41 @@ Bagian Spesifik yang Dibantu AI:
 3. Pencarian dengan Debouncing: Menerapkan logika penundaan eksekusi (timer menggunakan setTimeout dan clearTimeout) agar fungsi fetch() tidak membebani server setiap kali user mengetik di kolom pencarian.
 
 4. Manipulasi DOM & State Handling: Menyusun elemen HTML secara dinamis menggunakan template literal pada JavaScript, serta menangani state saat data sedang dimuat (loading), kosong, maupun error.
+
+
+
+
+### Tugas 6
+
+1. Jelaskan apa yang dimaksud dengan REST dan mengapa mengembalikan JSON saja belum cukup untuk menyebut sebuah API sebagai RESTful! Jelaskan pula perbedaan PUT dan PATCH beserta contoh kapan masing-masing sebaiknya digunakan!
+REST (Representational State Transfer) adalah sebuah gaya arsitektur perangkat lunak untuk membangun *web service*, bukan sekadar format pertukaran data. Mengembalikan JSON saja belum cukup untuk disebut RESTful karena sebuah API harus memenuhi prinsip-prinsip REST lainnya, seperti *statelessness* (server tidak menyimpan state klien), arsitektur *client-server*, dan menggunakan *HTTP methods* (GET, POST, PUT, DELETE) yang merepresentasikan aksi pada sebuah sumber daya (*resource-based*), bukan sekadar eksekusi fungsi.
+Perbedaan PUT dan PATCH terletak pada cakupan pembaruannya. **PUT** digunakan untuk menimpa atau mengganti (*replace*) keseluruhan data suatu *resource*. Sebaiknya digunakan ketika kita ingin memperbarui seluruh profil pengguna sekaligus (nama, email, dan alamat). Sedangkan **PATCH** digunakan untuk pembaruan sebagian (*partial update*). Sebaiknya digunakan ketika kita hanya ingin mengubah satu *field*, misalnya hanya memperbarui foto profil pengguna tanpa mereset *field* lainnya.
+
+
+2. Jelaskan peran serializer pada Django REST Framework! Apa keuntungannya dibandingkan merakit dictionary secara manual dengan JsonResponse seperti pada Tutorial 05?
+*Serializer* pada Django REST Framework (DRF) berperan sebagai penerjemah yang mengubah tipe data kompleks milik Django (seperti objek Model atau *QuerySet*) menjadi tipe data bawaan Python (seperti *dictionary*) agar mudah di-*render* ke format JSON, dan sebaliknya (menerjemahkan JSON masuk ke objek Django).
+Keuntungannya dibandingkan merakit `JsonResponse` secara manual adalah efisiensi dan keamanan. Kita tidak perlu memetakan *field* model satu per satu secara *hardcode* (*looping* manual). Dengan `ModelSerializer`, DRF otomatis mengenali *field* model, mendukung relasi antar-tabel secara bawaan, dan yang paling penting, memiliki fitur validasi data otomatis (misalnya pengecekan format atau sanitasi XSS dengan `strip_tags`) sebelum data disimpan ke *database*.
+
+
+3. Jelaskan perbedaan autentikasi dan otorisasi pada Django REST Framework! Mengapa hak akses harus diperiksa dengan permission class di server, bukan hanya dengan menyembunyikan tombol di template?
+Autentikasi (*Authentication*) adalah proses memverifikasi identitas pengguna (menjawab "Siapa kamu?"), misalnya melalui proses *login* untuk mengetahui apakah user tersebut terdaftar. Sedangkan Otorisasi (*Authorization*) adalah proses menentukan hak akses apa yang dimiliki oleh pengguna tersebut setelah dikenali (menjawab "Apa yang boleh kamu lakukan?"), misalnya Pengguna Biasa hanya bisa melihat data, sedangkan Editor bisa mengeditnya.
+Hak akses wajib diperiksa menggunakan *permission class* di sisi server (*backend*) karena menyembunyikan elemen visual (seperti tombol Hapus) di *template* HTML tidak menghentikan penyerang. Seseorang tetap bisa mengakses dan menembak *endpoint* URL aksi tersebut secara paksa melalui alat seperti Postman atau melalui *Inspect Element*. Perlindungan di level server memastikan aksi tetap ditolak dan aman meskipun diserang langsung ke API-nya.
+
+
+4. Jelaskan mengapa permintaan yang mengubah data tetap memerlukan token CSRF ketika API memakai SessionAuthentication! Mengapa test yang memakai force_authenticate tidak cukup untuk membuktikan bahwa perlindungan CSRF berjalan?
+Permintaan yang mengubah data (POST, PUT, PATCH, DELETE) tetap memerlukan token CSRF karena metode `SessionAuthentication` mengandalkan Cookie (*Session ID*) yang akan selalu dikirimkan secara otomatis oleh *browser* pada setiap *request*. Tanpa token CSRF, API sangat rentan terhadap serangan *Cross-Site Request Forgery*, di mana situs web peretas dapat mengelabui *browser* korban untuk mengirim *request* pengubahan data tanpa sepengetahuan korban, memanfaatkan sesi yang masih aktif.
+Sedangkan pada saat *testing*, menggunakan `force_authenticate` tidak cukup membuktikan perlindungan CSRF karena fungsi tersebut dirancang secara eksplisit untuk melewati (*bypass*) seluruh lapisan *middleware* keamanan dan pengecekan autentikasi normal. Untuk membuktikan sistem menolak *request* palsu, kita harus menggunakan `APIClient(enforce_csrf_checks=True)` yang akan mereplikasi kondisi nyata *browser* dan memicu mekanisme validasi CSRF.
+
+
+
+---
+
+**Deklarasi Penggunaan AI:**
+Dalam pengerjaan Tugas 6 ini, saya menggunakan Gemini sebagai alat bantu. Secara keseluruhan, AI sangat membantu dalam memahami konsep arsitektur REST, memfasilitasi transisi dari *Server-Side Rendering* (SSR) ke *Client-Side Rendering* menggunakan AJAX secara penuh, serta mendiagnosis dan memperbaiki kegagalan skenario *testing* bawaan Django.
+
+**Bagian Spesifik yang Dibantu AI:**
+
+1. **Refactoring Endpoint & UUID:** Membantu memperbaiki error `NoReverseMatch` di sisi frontend dengan menyesuaikan *URL placeholder* untuk *reverse lookup* menjadi format UUID yang valid (`00000000-0000-0000-0000-000000000000`) agar selaras dengan tipe *Primary Key* di model.
+2. **Implementasi AJAX & Modularisasi:** Membantu memusatkan form *create* dan *update* ke dalam komponen popover modal langsung di dalam `experience.html`, serta menyarankan penggunaan `{% include %}` untuk komponen *Toast* agar mengikuti prinsip DRY (Don't Repeat Yourself).
+3. **Penyelesaian Dead Code:** Memberikan arahan *best practice* untuk membersihkan struktur folder dengan menghapus template lama (`create_experience.html`, `update_experience.html`, dll.) yang fungsinya sudah digantikan penuh oleh *fetch* API AJAX.
+4. **Debugging Test Suite:** Membantu mengidentifikasi penyebab tiga skenario *test* yang terus menerus *FAIL*, yang ternyata disebabkan oleh pengujian HTML *raw* yang sudah tidak kompatibel dengan mekanisme render asinkron AJAX, sehingga mengarahkan pada penghapusan *test* lama yang *obsolete*.
