@@ -13,10 +13,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from django.contrib import admin
-from django.urls import path
 
-from portofolio.views import landing_page
 # Load environment variables from .env file
 load_dotenv()
 
@@ -33,9 +30,7 @@ SECRET_KEY = 'django-insecure-(#b*z3d@#dyp0pv$x5#dq68=c6v@fp4-v&vyi+81dz1)1a=k4$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
-
 
 
 # Application definition
@@ -47,14 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken',
     'main',
-    "rest_framework",
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,9 +80,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'portofolio.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
 # Database configuration
 if PRODUCTION:
     DATABASES = {
@@ -111,8 +105,6 @@ else:
 
 
 # Password validation
-# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -130,8 +122,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -142,8 +132,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.1/howto/static-files/
-
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -151,8 +139,6 @@ WHITENOISE_USE_FINDERS = True
 
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
@@ -162,4 +148,15 @@ MAILERS = {
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
 
-CSRF_TRUSTED_ORIGINS=["https://muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
+CSRF_TRUSTED_ORIGINS = ["https://muhammad-fachri54-myportofolio.pws.cs.ui.ac.id"]
+
+
+# Django REST Framework & CORS Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
+CORS_ALLOW_ALL_ORIGINS = True

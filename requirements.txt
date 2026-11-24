@@ -6,3 +6,4 @@ whitenoise
 requests
 urllib3
 djangorestframework~=3.18.3
+django-cors-headers
